@@ -1,0 +1,85 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  padding: 20px;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 16px;
+}
+
+h1 {
+  text-align: center;
+}
+
+button {
+  min-width: 100px;
+  padding: 5px 10px;
+  background-color: khaki;
+  border: 1px solid black;
+  border-radius: 5px;
+  cursor: pointer;
+
+  transition: background-color 0.3s ease;
+}
+
+button:hover,
+button:focus {
+  background-color: darkkhaki;
+}
+
+#root {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.message {
+  width: 450px;
+  margin-bottom: 25px;
+}
+
+.left {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.right {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.message-metadata {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 10px 10px;
+}
+
+.message-body {
+  width: 100%;
+  min-height: 50px;
+  padding: 10px;
+  margin-bottom: 10px;
+
+  border-radius: 10px;
+
+  overflow: auto;
+  resize: none;
+}
+
+.message-body-left {
+  background-color: bisque;
+}
+
+.message-body-right {
+  background-color: lightblue;
+}
+
+.message-controlers {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 30px;
+  justify-content: flex-start;
+  margin: 0 10px;
+}

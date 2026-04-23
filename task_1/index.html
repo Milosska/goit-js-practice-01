@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+
+  <script>
+    /** React-like implementation of a chat application without using any libraries. */
+
+    /** Renders the form for sending new messages.
+     * It uses sendMessage  from the global Window scope assigned inside of MyChat function
+     * to handle the sending of messages when the "Send" button is clicked.
+     */
+    const createForm = () => `
+        <div class="message right current-message">
+      <textarea name="message" class="message-body message-body-right"></textarea>
+      <div class="message-controlers">
+        <button type="button" class="message-controler-add" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+    `;
+
+    /** Renders a single message in the chat.
+     * It takes an object with message details (message text, author, and time)
+     * and an index as arguments. The message is styled differently
+     * based on whether the author is the current user or not.
+     * If the message is authored by the current user,
+     * "Delete" and "Edit" buttons are included,
+     * which call deleteMessage and editMessage functions
+     * from global Window scope assigned inside of MyChat function when clicked.
+     */
+    const createMessage = ({ message, author, time }, index) => {
+      return `
+        <div class="message ${author === globalThis.currentAutor ? "right" : "left"}">
+      <div class="message-metadata">
+        <p class="message-author">${author}</p>
+        <p class="message-time">${time}</p>
+      </div>
+      <div class="message-body ${author === currentAutor ? "message-body-right" : "message-body-left"}">${message}</div>
+      <div class="message-controlers">  
+      ${
+        author === globalThis.currentAutor
+          ? `
+      <button type="button" class="message-controler-delete" onclick="deleteMessage(${index})">Delete</button>
+      <button type="button" class="message-controler-edit" onclick="editMessage(${index})">Edit</button>`
+          : ""
+      }
+      </div>
+    </div>
+    `;
+    };
+
+    /** Renders all messages in the chat by mapping over an array of message objects
+     * and calling createMessage for each one. The resulting HTML strings are joined together
+     * to create the complete message list.
+     */
+    const createMessages = (messages) => messages.map(createMessage).join("");
+
+    /** A custom hook-like function that manages the state of messages in the chat.
+     * It uses a closure to store the previous state of messages in the global scope (prevState)
+     * and allows updating it through setState.
+     * When setState is called, it updates the previous state and triggers a re-render of the chat.
+     */
+    let prevState = null;
+    const useEffect = (initialState) => {
+      let state = initialState;
+
+      if (prevState !== null) {
+        state = prevState;
+      }
+
+      const setState = (newState) => {
+        prevState = newState;
+        render();
+      };
+
+      return [state, setState];
+    };
+
+    /** The main function that renders the chat application.
+     * It initializes the messages state using useEffect and defines functions
+     * for sending, deleting, editing, and updating messages.
+     * These functions are assigned to the global Window scope to be accessible from the HTML elements.
+     * The function returns the complete HTML structure of the chat, including the header, messages, and form.
+     */
+    function MyChat(message) {
+      console.log("MyChat is rendering...");
+
+      const [messages, setMessages] = useEffect([
+        {
+          message: "Hi, how are you?",
+          author: "Skif",
+          time: new Date(Date.now()).toLocaleTimeString(),
+        },
+        {
+          message: "I'm good. What about you?",
+          author: "Alcione",
+          time: new Date(Date.now()).toLocaleTimeString(),
+        },
+        {
+          message: "All good",
+          author: "Skif",
+          time: new Date(Date.now()).toLocaleTimeString(),
+        },
+      ]);
+
+      const sendMessage = (messageIndex) => {
+        const currentMessage = document.querySelector(".current-message");
+        const messageText = currentMessage.querySelector(".message-body").value;
+
+        setMessages([
+          ...messages,
+          {
+            message: messageText,
+            author: globalThis.currentAutor,
+            time: new Date(Date.now()).toLocaleTimeString(),
+          },
+        ]);
+      };
+
+      const deleteMessage = (messageIndex) => {
+        const newMessages = messages.filter(
+          (_, index) => index !== messageIndex,
+        );
+        setMessages(newMessages);
+      };
+
+      const updateMessage = (messageIndex) => {
+        const currentMessage = messages.find(
+          (_, index) => index === messageIndex,
+        );
+
+        if (!currentMessage) {
+          return;
+        }
+
+        const messageArea = document.querySelectorAll(".message")[messageIndex];
+        const messageText = messageArea.querySelector(".message-updated").value;
+
+        return setMessages(
+          messages.map((message, index) =>
+            index === messageIndex
+              ? { ...message, message: messageText }
+              : message,
+          ),
+        );
+      };
+
+      const editMessage = (messageIndex) => {
+        const messageArea = document.querySelectorAll(".message")[messageIndex];
+        const messageBody = messageArea.querySelector(".message-body");
+        messageBody.innerHTML = `
+          <textarea name="message" class="message-body message-body-right message-updated">${messages[messageIndex].message}</textarea>
+          <div class="message-controlers">
+            <button type="button" class="message-controler-add" onclick="updateMessage(${messageIndex})">Save</button>
+          </div>
+        `;
+      };
+
+      globalThis.currentAutor = "Alcione";
+      globalThis.sendMessage = sendMessage;
+      globalThis.deleteMessage = deleteMessage;
+      globalThis.editMessage = editMessage;
+      globalThis.updateMessage = updateMessage;
+
+      const chatHeader = `<h1>My Chat</h1> `;
+      const chatMessages = createMessages(messages);
+      const form = createForm();
+
+      return chatHeader + chatMessages + form;
+    }
+
+    /** The render function is responsible for rendering the chat application to the DOM.
+     * It calls MyChat to get the HTML structure of the chat and updates the innerHTML of the root element.
+     * This function is called initially to render the chat and is also triggered whenever the state of messages changes.
+     */
+    function render() {
+      console.log("Global rendering...");
+      document.querySelector("#root").innerHTML = MyChat();
+    }
+
+    // Initial render of the chat application
+    render();
+  </script>
+</html>
