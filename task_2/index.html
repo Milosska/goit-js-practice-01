@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <title>Document</title>
+  </head>
+  <body></body>
+
+  <script>
+    // #region 1. Object creation with prototypes
+    const DEFAULT_SEPARATOR = " ";
+    const userPrototype = {
+      getFullName(separator = DEFAULT_SEPARATOR) {
+        return `${this.firstName}${separator}${this.lastName}`;
+      },
+      sayHello() {
+        return `Hello, I'm ${this.getFullName()}!`;
+      },
+    };
+
+    function createUser(firstName, lastName) {
+      return Object.create(userPrototype, {
+        firstName: { value: firstName, enumerable: true },
+        lastName: { value: lastName, enumerable: true },
+      });
+    }
+
+    const user1 = createUser("John", "Doe");
+    console.log(user1.getFullName()); // John Doe
+    // #endregion
+
+    // #region 2. Function constructor and prototypes
+    function Detective(firstName, lastName) {
+      this.firstName = firstName;
+      this.lastName = lastName;
+      this.address = "London, Baker Street 221B";
+    }
+
+    Detective.prototype.getFullData = function (separator = DEFAULT_SEPARATOR) {
+      return `${this.firstName}${separator}${this.lastName}, lives at ${this.address}`;
+    };
+
+    const detective = new Detective("Liudmyla", "Deinychenko");
+    console.log(detective.getFullData()); // Liudmyla Deinychenko, lives at London, Baker Street 221B
+    // #endregion
+
+    // #region 3. Create implementation of the `new` operator
+    /** Create a new object that inherits from the constructor's prototype (available for functions only)
+     * Call the constructor function with the new object as its context and the provided arguments
+     * Return the newly created object.
+     *
+     * Creating a new object with the constructor's prototype ensures
+     * that the new object has access to the methods defined on the constructor's prototype.
+     * For example, getFullData() method defined on Detective.prototype.
+     *
+     * Calling the constructor function with the new object as its context
+     * allows the constructor to initialize the properties of the new object.
+     */
+    function myNew(constructor, ...args) {
+      const obj = Object.create(constructor.prototype);
+      constructor.apply(obj, args);
+      return obj;
+    }
+
+    // Equals to `new Detective("Sherlock", "Holmes")`
+    const detective2 = myNew(Detective, "Sherlock", "Holmes");
+    console.log(detective2.getFullData()); // Sherlock Holmes, lives at London,
+    // #endregion
+
+    // #region 4.Array prototype Extentions (Polifill for sortRandom and toSortRandom)
+    /** Polifill is a function that implements a feature on web browsers that do not support it natively.
+     * In this case, we are implementing two methods for the Array prototype: sortRandom and toSortRandom.
+     * It uses the Array.prototype to add these methods to all arrays, allowing us to call them on any array instance.
+     */
+    function sortRandom() {
+      return this.sort(() => Math.random() - 0.5);
+    }
+
+    function toSortRandom() {
+      return [...this].sort(() => Math.random() - 0.5);
+    }
+
+    Array.prototype.sortRandom = sortRandom;
+    Array.prototype.toSortRandom = toSortRandom;
+
+    const arr = [1, 2, 3, 4, 5];
+    console.log({ oridinalArray: arr, sortedArray: arr.toSortRandom() }); // Randomly sorted array (does not mutate original array)
+
+    debugger;
+    console.log({ oridinalArray: arr, sortedArray: arr.sortRandom() }); // Randomly sorted array (mutates original array)
+    // #endregion
+  </script>
+</html>
