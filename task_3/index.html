@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <title>Document</title>
+  </head>
+  <body style="margin: 0; padding: 0">
+    <div
+      id="area"
+      style="
+        position: relative;
+        margin: 20px;
+        width: calc(100% - 40px);
+        height: 200px;
+        background-color: lightgray;
+        border: 2px solid black;
+        border-radius: 5px;
+        overflow: hidden;
+      "
+    >
+      <div
+        id="figure"
+        style="
+          position: absolute;
+          width: 50px;
+          height: 50px;
+          background-color: red;
+        "
+      ></div>
+    </div>
+  </body>
+
+  <script>
+    /**
+     * This code implements a draggable figure within a defined area on a webpage.
+     * The figure can be dragged using the mouse, and its movement
+     * is constrained within the boundaries of the area.
+     */
+
+    // Step 1: Define variables to track the dragging state
+    // and the initial mouse position relative to the figure.
+    let isDragging = false;
+    let shiftX = 0;
+    let shiftY = 0;
+
+    const area = document.getElementById("area");
+    const figure = document.getElementById("figure");
+
+    // Step 2: Add event listeners to handle the dragging behavior.
+    // When the mouse button is pressed down on the figure, we set isDragging to true
+    // and calculate the initial shift between the mouse position and the figure's top-left corner.
+    // When the mouse button is released, we set isDragging to false.
+    figure.addEventListener("mousedown", (event) => {
+      isDragging = true;
+
+      const figureRect = figure.getBoundingClientRect();
+
+      shiftX = event.clientX - figureRect.left;
+      shiftY = event.clientY - figureRect.top;
+    });
+
+    document.addEventListener("mouseup", () => {
+      isDragging = false;
+    });
+
+    // Step 3: Add an event listener for mouse movement to update the position of the figure.
+    document.addEventListener("mousemove", (event) => {
+      // If the mouse btn is up - return
+      if (!isDragging) return;
+
+      // Get the bounding rectangles of the area and the figure to calculate their positions and dimensions.
+      const areaRect = area.getBoundingClientRect();
+      const currentFigureRect = figure.getBoundingClientRect();
+
+      // Calculate the new position of the figure based on the current mouse position
+      // and the initial shift defined on mousedown event. The inisial shift ensures
+      // that the figure moves in sync with the mouse cursor, maintaining the same
+      // relative position between the cursor and the figure throughout the dragging process.
+      let x = event.clientX - areaRect.left - shiftX;
+      let y = event.clientY - areaRect.top - shiftY;
+
+      // Ensure that the figure stays within the boundaries of the area
+      // by checking against the area's dimensions and adjusting the position accordingly.
+      // Limit left boundary
+      if (x < 0) {
+        x = 0;
+      }
+
+      // Limit top boundary
+      if (y < 0) {
+        y = 0;
+      }
+
+      // Limit right boundary
+      if (x + currentFigureRect.width > area.clientWidth) {
+        x = area.clientWidth - figure.offsetWidth;
+      }
+
+      // Limit bottom boundary
+      if (y + currentFigureRect.height > area.clientHeight) {
+        y = area.clientHeight - figure.offsetHeight;
+      }
+
+      // Update the position of the figure by setting its left and top CSS properties.
+      figure.style.left = `${x}px`;
+      figure.style.top = `${y}px`;
+    });
+  </script>
+</html>
